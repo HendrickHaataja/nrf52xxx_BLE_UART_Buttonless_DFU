@@ -1,0 +1,22 @@
+#ignore all files by default
+*
+#except c source and header files
+!*.c
+!*.h
+
+#And... subdirectories
+!*/
+
+#Include make files and linker scripts
+!*mk
+!*Makefile*
+!*.ld
+
+#include this file
+!*.gitignore
+
+#Include zip firmware packages if they are created in this project
+#Also include hex files/bin files
+!*.zip
+!*.hex
+!*.bin
