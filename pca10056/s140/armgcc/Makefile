@@ -19,6 +19,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/button/app_button.c \
   $(SDK_ROOT)/components/libraries/util/app_error.c \
   $(SDK_ROOT)/components/libraries/util/app_error_weak.c \
+  $(SDK_ROOT)/components/libraries/fifo/app_fifo.c \
   $(SDK_ROOT)/components/libraries/scheduler/app_scheduler.c \
   $(SDK_ROOT)/components/libraries/timer/app_timer.c \
   $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
@@ -43,7 +44,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_nfc.c \
   $(SDK_ROOT)/components/libraries/uart/app_uart_fifo.c \
-  $(SDK_ROOT)/components/libraries/uart/app_uart.c \
+  $(SDK_ROOT)/components/libraries/atomic_fifo/nrf_atfifo.c \
   $(SDK_ROOT)/components/ble/ble_services/ble_nus/ble_nus.c \
   $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/components/libraries/bootloader/dfu/nrf_dfu_svci.c \
@@ -121,6 +122,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/external/fprintf \
   $(SDK_ROOT)/components/libraries/svc \
   $(SDK_ROOT)/components/libraries/uart \
+  $(SDK_ROOT)/components/libraries/fifo \
   $(SDK_ROOT)/components/ble/ble_services/ble_nus \
 
 # Libraries common to all targets

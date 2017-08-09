@@ -818,7 +818,7 @@ void uart_event_handle(app_uart_evt_t * p_event)
     switch (p_event->evt_type)
     {
         case APP_UART_DATA_READY:
-            //UNUSED_VARIABLE(app_uart_get(&data_array[index]));
+            UNUSED_VARIABLE(app_uart_get(&data_array[index]));
             index++;
 
             if ((data_array[index - 1] == '\n') || (index >= (m_ble_nus_max_data_len)))
@@ -859,25 +859,25 @@ void uart_event_handle(app_uart_evt_t * p_event)
 /**@snippet [UART Initialization] */
 static void uart_init(void)
 {
-//    uint32_t                     err_code;
-//    app_uart_comm_params_t const comm_params =
-//    {
-//        .rx_pin_no    = RX_PIN_NUMBER,
-//        .tx_pin_no    = TX_PIN_NUMBER,
-//        .rts_pin_no   = RTS_PIN_NUMBER,
-//        .cts_pin_no   = CTS_PIN_NUMBER,
-//        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
-//        .use_parity   = false,
-//        .baud_rate    = UART_BAUDRATE_BAUDRATE_Baud115200
-//    };
-//
-   // APP_UART_FIFO_INIT(&comm_params,
-   //                    UART_RX_BUF_SIZE,
-   //                    UART_TX_BUF_SIZE,
-   //                    uart_event_handle,
-   //                    APP_IRQ_PRIORITY_LOWEST,
-   //                    err_code);
-   // APP_ERROR_CHECK(err_code);
+    uint32_t                     err_code;
+    app_uart_comm_params_t const comm_params =
+    {
+        .rx_pin_no    = RX_PIN_NUMBER,
+        .tx_pin_no    = TX_PIN_NUMBER,
+        .rts_pin_no   = RTS_PIN_NUMBER,
+        .cts_pin_no   = CTS_PIN_NUMBER,
+        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
+        .use_parity   = false,
+        .baud_rate    = UART_BAUDRATE_BAUDRATE_Baud115200
+    };
+
+   APP_UART_FIFO_INIT(&comm_params,
+                       UART_RX_BUF_SIZE,
+                       UART_TX_BUF_SIZE,
+                       uart_event_handle,
+                       APP_IRQ_PRIORITY_LOWEST,
+                       err_code);
+    APP_ERROR_CHECK(err_code);
 }
 /**@snippet [UART Initialization] */
 
