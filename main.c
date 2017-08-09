@@ -84,10 +84,14 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+//uart headers
+#include "ble_nus.h"
+#include "app_uart.h"
+#include "app_util_platform.h"
 
 #define APP_FEATURE_NOT_SUPPORTED       BLE_GATT_STATUS_ATTERR_APP_BEGIN + 2        /**< Reply when unsupported features are requested. */
 
-#define DEVICE_NAME                     "Nordic_Buttonless"                         /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "My Nordic_Buttonless"                         /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                       /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                300                                         /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
 #define APP_ADV_TIMEOUT_IN_SECONDS      180                                         /**< The advertising timeout in units of seconds. */
@@ -115,6 +119,16 @@
 
 #define DEAD_BEEF                       0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
+
+/* ****************************************************************************/
+//Uart defines
+#define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
+#define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
+
+static uint16_t   m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;            /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
+
+BLE_NUS_DEF(m_nus);                                                                 /**< BLE NUS service instance. */
+/* ****************************************************************************/
 
 NRF_BLE_GATT_DEF(m_gatt);                                                           /**< GATT module instance. */
 BLE_ADVERTISING_DEF(m_advertising);                                                 /**< Advertising module instance. */
@@ -154,11 +168,11 @@ static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
             //{
             //
             //    // Device ready to enter
-            //    uint32_t err_code;
+                uint32_t err_code;
             //    err_code = sd_softdevice_disable();
             //    APP_ERROR_CHECK(err_code);
-            //    err_code = app_timer_stop_all();
-            //    APP_ERROR_CHECK(err_code);
+                err_code = app_timer_stop_all();
+                APP_ERROR_CHECK(err_code);
             //}
             break;
 
@@ -788,6 +802,85 @@ static void bsp_event_handler(bsp_event_t event)
     }
 }
 
+/**@brief   Function for handling app_uart events.
+ *
+ * @details This function will receive a single character from the app_uart module and append it to
+ *          a string. The string will be be sent over BLE when the last character received was a
+ *          'new line' '\n' (hex 0x0A) or if the string has reached the maximum data length.
+ */
+/**@snippet [Handling the data received over UART] */
+void uart_event_handle(app_uart_evt_t * p_event)
+{
+    static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
+    static uint8_t index = 0;
+    uint32_t       err_code;
+
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            //UNUSED_VARIABLE(app_uart_get(&data_array[index]));
+            index++;
+
+            if ((data_array[index - 1] == '\n') || (index >= (m_ble_nus_max_data_len)))
+            {
+                NRF_LOG_DEBUG("Ready to send data over BLE NUS");
+                NRF_LOG_HEXDUMP_DEBUG(data_array, index);
+
+                do
+                {
+                    uint16_t length = (uint16_t)index;
+                    err_code = ble_nus_string_send(&m_nus, data_array, &length);
+                    if ( (err_code != NRF_ERROR_INVALID_STATE) && (err_code != NRF_ERROR_BUSY) )
+                    {
+                        APP_ERROR_CHECK(err_code);
+                    }
+                } while (err_code == NRF_ERROR_BUSY);
+
+                index = 0;
+            }
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_communication);
+            break;
+
+        case APP_UART_FIFO_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_code);
+            break;
+
+        default:
+            break;
+    }
+}
+/**@snippet [Handling the data received over UART] */
+
+/**@brief  Function for initializing the UART module.
+ */
+/**@snippet [UART Initialization] */
+static void uart_init(void)
+{
+//    uint32_t                     err_code;
+//    app_uart_comm_params_t const comm_params =
+//    {
+//        .rx_pin_no    = RX_PIN_NUMBER,
+//        .tx_pin_no    = TX_PIN_NUMBER,
+//        .rts_pin_no   = RTS_PIN_NUMBER,
+//        .cts_pin_no   = CTS_PIN_NUMBER,
+//        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
+//        .use_parity   = false,
+//        .baud_rate    = UART_BAUDRATE_BAUDRATE_Baud115200
+//    };
+//
+   // APP_UART_FIFO_INIT(&comm_params,
+   //                    UART_RX_BUF_SIZE,
+   //                    UART_TX_BUF_SIZE,
+   //                    uart_event_handle,
+   //                    APP_IRQ_PRIORITY_LOWEST,
+   //                    err_code);
+   // APP_ERROR_CHECK(err_code);
+}
+/**@snippet [UART Initialization] */
+
 
 /**@brief Function for initializing the Advertising functionality.
  */
@@ -890,6 +983,9 @@ int main(void)
     // Initialize.
 
     timers_init();
+
+    uart_init();
+
     log_init();
 
 
