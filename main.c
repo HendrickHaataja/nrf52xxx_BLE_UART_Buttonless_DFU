@@ -84,6 +84,9 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+#include"SEGGER_RTT.h"
+#include "ble_gatts.h"
+
 //uart headers
 #include "ble_nus.h"
 #include "app_uart.h"
@@ -122,8 +125,8 @@
 
 /* ****************************************************************************/
 //Uart defines
-#define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
+#define UART_TX_BUF_SIZE               64 /*256 */                                        /**< UART TX buffer size. */
+#define UART_RX_BUF_SIZE               64 /*256*/                                         /**< UART RX buffer size. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 static uint16_t   m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;            /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
@@ -196,8 +199,8 @@ NRF_PWR_MGMT_HANDLER_REGISTER(app_shutdown_handler, 0);
 
 
 // YOUR_JOB: Use UUIDs for service(s) used in your application.
-static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
-                                   /*{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}*/};
+//static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}};
+                    //            {{BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}   /*
 
 
 // YOUR_JOB: Update this code if you want to do anything given a DFU event (optional).
@@ -401,9 +404,9 @@ static void gap_params_init(void)
                                           strlen(DEVICE_NAME));
     APP_ERROR_CHECK(err_code);
 
-    /* YOUR_JOB: Use an appearance value matching the application's use case.
-       err_code = sd_ble_gap_appearance_set(BLE_APPEARANCE_);
-       APP_ERROR_CHECK(err_code); */
+    /* YOUR_JOB: Use an appearance value matching the application's use case.*/
+       err_code = sd_ble_gap_appearance_set(BLE_APPEARANCE_UNKNOWN);
+       APP_ERROR_CHECK(err_code);/* */
 
     memset(&gap_conn_params, 0, sizeof(gap_conn_params));
 
@@ -489,7 +492,22 @@ static void gap_params_init(void)
  */
 static void services_init(void)
 {
+
     uint32_t err_code;
+
+   //Uart service init
+   //ble_nus_init_t nus_init;
+   //memset(&nus_init, 0, sizeof(nus_init));
+   //nus_init.data_handler = nus_data_handler;
+
+   //SEGGER_RTT_WriteString(0, "Will attempt to init ble_nus...\n");
+   //err_code = ble_nus_init(&m_nus, &nus_init);
+   //SEGGER_RTT_WriteString(0, "Attempted to init ble_nus...\n");
+   //SEGGER_RTT_printf(0, "%d is the error code\n",err_code);
+   //APP_ERROR_CHECK(err_code);
+   //End of uart service init
+
+    SEGGER_RTT_WriteString(0, "Entering services_init...\n");
     ble_dfu_buttonless_init_t dfus_init =
     {
         .evt_handler = ble_dfu_evt_handler
@@ -498,19 +516,14 @@ static void services_init(void)
     // Initialize the async SVCI interface to bootloader.
     err_code = ble_dfu_buttonless_async_svci_init();
     APP_ERROR_CHECK(err_code);
-    
+    SEGGER_RTT_printf(0, "%d is the error code after async svci\n",err_code);
+
+    SEGGER_RTT_WriteString(0, "Initialized async svci inteface...\n");
     
     err_code = ble_dfu_buttonless_init(&dfus_init);
+    SEGGER_RTT_WriteString(0, "Initialized buttonless dfu...\n");
+    SEGGER_RTT_printf(0, "%d is the error code after buttonless dfu\n",err_code);
     APP_ERROR_CHECK(err_code);
-
-   //Uart service init
-   // ble_nus_init_t nus_init;
-   // memset(&nus_init, 0, sizeof(nus_init));
-
-   // nus_init.data_handler = nus_data_handler;
-
-   // err_code = ble_nus_init(&m_nus, &nus_init);
-   // APP_ERROR_CHECK(err_code);
 
     /* YOUR_JOB: Add code to initialize the services used by the application.
        uint32_t                           err_code;
@@ -766,6 +779,12 @@ static void ble_stack_init(void)
     APP_ERROR_CHECK(err_code);
 
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
+
+ //   ble_cfg_t ble_cfg;
+ //   memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+ //   ble_cfg.gatts_cfg.attr_tab_size.attr_tab_size = 2000;
+ //   err_code = sd_ble_cfg_set(BLE_GATTS_CFG_ATTR_TAB_SIZE, &ble_cfg, ram_start);
+ //   APP_ERROR_CHECK(err_code);
 }
 
 
@@ -947,9 +966,9 @@ static void advertising_init(void)
     init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
     init.advdata.include_appearance      = true;
     init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+    //init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
     //init.advdata.uuids_more_available.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
-    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
+    //init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
     //init.advdata.uuids_more_available.p_uuids  = m_adv_uuids;
 
     init.config.ble_adv_fast_enabled  = true;
@@ -959,6 +978,7 @@ static void advertising_init(void)
     init.evt_handler = on_adv_evt;
 
     err_code = ble_advertising_init(&m_advertising, &init);
+    SEGGER_RTT_printf(0, "%d is the advertising error code\n",err_code);
     APP_ERROR_CHECK(err_code);
 
     ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
@@ -1035,26 +1055,52 @@ int main(void)
 {
     bool erase_bonds;
 
+    SEGGER_RTT_WriteString(0, "Starting main...\n");
     // Initialize.
 
     timers_init();
 
+    SEGGER_RTT_WriteString(0, "Starting timers...\n");
+
     uart_init();
+
+    SEGGER_RTT_WriteString(0, "Starting uart...\n");
 
     log_init();
 
+    SEGGER_RTT_WriteString(0, "Starting log...\n");
 
     power_management_init();
+
+    SEGGER_RTT_WriteString(0, "Starting pwr mgt...\n");
+
     buttons_leds_init(&erase_bonds);
+
+    SEGGER_RTT_WriteString(0, "Starting buttons...\n");
+
     ble_stack_init();
+    SEGGER_RTT_WriteString(0, "Starting ble stac...\n");
+
     peer_manager_init();
+    SEGGER_RTT_WriteString(0, "Starting peer manager...\n");
+
     gap_params_init();
+    SEGGER_RTT_WriteString(0, "Starting gap...\n");
+
     gatt_init();
+    SEGGER_RTT_WriteString(0, "Starting gatt...\n");
+
     advertising_init();
+    SEGGER_RTT_WriteString(0, "Starting advertising...\n");
+
     services_init();
+    SEGGER_RTT_WriteString(0, "Starting services...\n");
+
     conn_params_init();
+    SEGGER_RTT_WriteString(0, "Starting conn...\n");
 
     NRF_LOG_INFO("Application started\n");
+    SEGGER_RTT_WriteString(0, "Application started\n");
 
     // Start execution.
     application_timers_start();
