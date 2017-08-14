@@ -456,7 +456,7 @@ static void gap_params_init(void)
  * @param[in] length   Length of the data.
  */
 /**@snippet [Handling the data received over BLE] */
-/*static void nus_data_handler(ble_nus_evt_t * p_evt)
+static void nus_data_handler(ble_nus_evt_t * p_evt)
 {
 
     if (p_evt->type == BLE_NUS_EVT_RX_DATA)
@@ -484,7 +484,7 @@ static void gap_params_init(void)
         }
     }
 
-}*/
+}
 /**@snippet [Handling the data received over BLE] */
 
 
@@ -493,18 +493,22 @@ static void gap_params_init(void)
 static void services_init(void)
 {
 
+    //uint32_t memRequired = sd_ble_enable();
     uint32_t err_code;
 
    //Uart service init
-   //ble_nus_init_t nus_init;
-   //memset(&nus_init, 0, sizeof(nus_init));
-   //nus_init.data_handler = nus_data_handler;
+   ble_nus_init_t nus_init;
+   memset(&nus_init, 0, sizeof(nus_init));
+   nus_init.data_handler = nus_data_handler;
+   //nus_init.is_notification_enabled = true;
+   //nus_init.uuid_type = ;
+   //nus_init.service_handle = ;
 
-   //SEGGER_RTT_WriteString(0, "Will attempt to init ble_nus...\n");
-   //err_code = ble_nus_init(&m_nus, &nus_init);
-   //SEGGER_RTT_WriteString(0, "Attempted to init ble_nus...\n");
-   //SEGGER_RTT_printf(0, "%d is the error code\n",err_code);
-   //APP_ERROR_CHECK(err_code);
+   SEGGER_RTT_WriteString(0, "Will attempt to init ble_nus...\n");
+   err_code = ble_nus_init(&m_nus, &nus_init);
+   SEGGER_RTT_WriteString(0, "Attempted to init ble_nus...\n");
+   SEGGER_RTT_printf(0, "%d is the error code\n",err_code);
+   APP_ERROR_CHECK(err_code);
    //End of uart service init
 
     SEGGER_RTT_WriteString(0, "Entering services_init...\n");
@@ -1090,11 +1094,11 @@ int main(void)
     gatt_init();
     SEGGER_RTT_WriteString(0, "Starting gatt...\n");
 
-    advertising_init();
-    SEGGER_RTT_WriteString(0, "Starting advertising...\n");
-
     services_init();
     SEGGER_RTT_WriteString(0, "Starting services...\n");
+
+    advertising_init();
+    SEGGER_RTT_WriteString(0, "Starting advertising...\n");
 
     conn_params_init();
     SEGGER_RTT_WriteString(0, "Starting conn...\n");
