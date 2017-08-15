@@ -300,7 +300,8 @@
  
 
 #ifndef NRF_DFU_BLE_BUTTONLESS_SUPPORTS_BONDS
-#define NRF_DFU_BLE_BUTTONLESS_SUPPORTS_BONDS 0
+#define NRF_DFU_BLE_BUTTONLESS_SUPPORTS_BONDS 0
+
 #endif
 
 // </h> 
@@ -1124,7 +1125,7 @@
 // <4=> Debug 
 
 #ifndef NRF_LOG_DEFAULT_LEVEL
-#define NRF_LOG_DEFAULT_LEVEL 0
+#define NRF_LOG_DEFAULT_LEVEL 4
 #endif
 
 // <q> NRF_LOG_DEFERRED  - Enable deffered logger.
@@ -1133,7 +1134,7 @@
 // <i> Log data is buffered and can be processed in idle.
 
 #ifndef NRF_LOG_DEFERRED
-#define NRF_LOG_DEFERRED 0
+#define NRF_LOG_DEFERRED 1
 #endif
 
 // <o> NRF_LOG_BUFSIZE  - Size of the buffer for storing logs (in bytes).
@@ -1151,7 +1152,7 @@
 // <16384=> 16384 
 
 #ifndef NRF_LOG_BUFSIZE
-#define NRF_LOG_BUFSIZE 128
+#define NRF_LOG_BUFSIZE 1024
 #endif
 
 // <q> NRF_LOG_ALLOW_OVERFLOW  - Configures behavior when circular buffer is full.
@@ -3190,7 +3191,7 @@
 
 // <o> NRF_SDH_BLE_VS_UUID_COUNT - The number of vendor-specific UUIDs. 
 #ifndef NRF_SDH_BLE_VS_UUID_COUNT
-#define NRF_SDH_BLE_VS_UUID_COUNT 1
+#define NRF_SDH_BLE_VS_UUID_COUNT 2
 #endif
 
 // <q> NRF_SDH_BLE_SERVICE_CHANGED  - Include the Service Changed characteristic in the Attribute Table.
