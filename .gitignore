@@ -20,3 +20,6 @@
 !*.zip
 !*.hex
 !*.bin
+
+#Include readme file
+!*.md
